@@ -6,21 +6,20 @@ buildscript {
 
 plugins {
     id 'java'
-//    id 'org.springframework.boot' version '4.0.1'
-    id 'org.springframework.boot' version '3.4.1'
+    id 'org.springframework.boot' version '3.5.1'
     id 'io.spring.dependency-management' version '1.1.7'
-//    id 'io.spring.dependency-management' version '1.1.4'
 }
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-description = 'nasda'
+description = 'bo1'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
+
 
 configurations {
     compileOnly {
@@ -33,44 +32,47 @@ repositories {
 }
 
 dependencies {
-
-    // Spring Boot Starters
-    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-//    implementation 'org.springframework.boot:spring-boot-starter-security'
-//    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-
-    // MariaDB
-    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
-
-    // Lombok
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     compileOnly 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
     annotationProcessor 'org.projectlombok:lombok'
 
-    // DevTools
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-
-    // Validation
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-
-    // File Upload
-    implementation 'commons-io:commons-io:2.15.1'
-    implementation 'commons-fileupload:commons-fileupload:1.5'
-
-    // Test
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
+//    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+//    testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
+//    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    // ModelMapper 추가
-    implementation 'org.modelmapper:modelmapper:3.2.0'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.2.0'
+    implementation 'org.modelmapper:modelmapper:3.1.0'
+
+    implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
+
+    annotationProcessor(
+            "jakarta.persistence:jakarta.persistence-api",
+
+            "jakarta.annotation:jakarta.annotation-api",
+
+            "com.querydsl:querydsl-apt:${queryDslVersion}:jakarta")
+//
+//    implementation 'io.springfox:springfox-boot-starter:3.0.0'
+//    implementation 'io.springfox:springfox-swagger-ui:3.0.0'
+
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
-
 sourceSets {
 
     main {
