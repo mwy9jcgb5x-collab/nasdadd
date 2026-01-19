@@ -23,60 +23,6 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    // ---------------------------------------------------------
-    // [미래 참고용 주석 블록] - 나중에 이 구조로 합치시면 됩니다.
-    // ---------------------------------------------------------
-    /*
-    @GetMapping("/dashboard")
-    public String adminMain(Model model,
-                            @RequestParam(value = "section", defaultValue = "accounts") String section,
-                            @RequestParam(value = "type", defaultValue = "post") String type,
-                            @RequestParam(value = "postPage", defaultValue = "0") int postPage,
-                            @RequestParam(value = "commentPage", defaultValue = "0") int commentPage,
-                            @RequestParam(value = "userPage", defaultValue = "0") int userPage) {
-        log.info("대시보드 통합 로딩 중...");
-
-        try {
-            // 1. 페이징 설정
-            Pageable postPageable = PageRequest.of(postPage, 10, Sort.by("reportId").descending());
-            Pageable commentPageable = PageRequest.of(commentPage, 10, Sort.by("reportId").descending());
-
-            model.addAttribute("section", section);
-            model.addAttribute("type", type);
-            model.addAttribute("categoryList", adminService.getAllCategories());
-            model.addAttribute("wordList", adminService.getAllWords());
-
-            // 2. 신고 페이징 처리
-            Page<PostReportDTO> postReportPage = adminService.getPendingPostReports(postPageable);
-            model.addAttribute("postReportList", postReportPage.getContent());
-            model.addAttribute("postTotalPages", postReportPage.getTotalPages());
-
-            Page<CommentReportDTO> commentReportPage = adminService.getPendingCommentReports(commentPageable);
-            model.addAttribute("commentReportList", commentReportPage.getContent());
-            model.addAttribute("commentTotalPages", commentReportPage.getTotalPages());
-
-        } catch (Exception e) {
-            log.error("오류 발생: " + e.getMessage());
-        }
-        return "admin/dashboard";
-    }
-
-    // [미래 주석] 등록 처리 시 중복 체크 포함 버전
-    @PostMapping("/register")
-    public String registerPost(String type, CategoryDTO categoryDTO, ForbiddenWordDTO wordDTO, RedirectAttributes rttr) {
-        try {
-            if ("category".equals(type)) { adminService.registerCategory(categoryDTO); }
-            else { adminService.registerWord(wordDTO); }
-        } catch (RuntimeException e) {
-            rttr.addFlashAttribute("error", e.getMessage());
-        }
-        return "redirect:/admin/dashboard";
-    }
-    */
-
-    // ---------------------------------------------------------
-    // [현재 실행 코드] 탭 구분 및 임시 유저 로직 포함
-    // ---------------------------------------------------------
     @GetMapping("/dashboard")
     public String adminMain(Model model,
                             @RequestParam(value = "section", defaultValue = "accounts") String section,
@@ -137,26 +83,48 @@ public class AdminController {
     }
 
     // 🚩 [수정] 등록 처리 시 중복 예외(RuntimeException) 캐치 로직 추가
+//    @PostMapping("/register")
+//    public String registerPost(@RequestParam("type") String type,
+//                               CategoryDTO categoryDTO,
+//                               ForbiddenWordDTO wordDTO,
+//                               RedirectAttributes rttr) {
+//        try {
+//            if ("category".equals(type)) {
+//                adminService.registerCategory(categoryDTO);
+//                rttr.addAttribute("section", "categories");
+//            } else if ("word".equals(type)) {
+//                adminService.registerWord(wordDTO);
+//                rttr.addAttribute("section", "banned");
+//            }
+//            rttr.addFlashAttribute("result", "success");
+//        } catch (RuntimeException e) {
+//            // 🚩 핵심: Service에서 던진 "이미 존재하는..." 메시지를 화면으로 전달
+//            log.error("등록 중 중복 발생: " + e.getMessage());
+//            rttr.addFlashAttribute("error", e.getMessage());
+//            rttr.addAttribute("section", "category".equals(type) ? "categories" : "banned");
+//        }
+//        return "redirect:/admin/dashboard";
+//    }
+
     @PostMapping("/register")
-    public String registerPost(@RequestParam("type") String type,
-                               CategoryDTO categoryDTO,
-                               ForbiddenWordDTO wordDTO,
-                               RedirectAttributes rttr) {
+    public String registerPost(@RequestParam("type") String type, CategoryDTO categoryDTO, ForbiddenWordDTO wordDTO, RedirectAttributes rttr) {
+        // 🚩 먼저 어디로 돌아갈지 정해둡니다.
+        String section = "category".equals(type) ? "categories" : "banned";
+
         try {
             if ("category".equals(type)) {
                 adminService.registerCategory(categoryDTO);
-                rttr.addAttribute("section", "categories");
             } else if ("word".equals(type)) {
                 adminService.registerWord(wordDTO);
-                rttr.addAttribute("section", "banned");
             }
             rttr.addFlashAttribute("result", "success");
         } catch (RuntimeException e) {
-            // 🚩 핵심: Service에서 던진 "이미 존재하는..." 메시지를 화면으로 전달
             log.error("등록 중 중복 발생: " + e.getMessage());
-            rttr.addFlashAttribute("error", e.getMessage());
-            rttr.addAttribute("section", "category".equals(type) ? "categories" : "banned");
+            rttr.addFlashAttribute("error", e.getMessage()); // [3번 기능] 중복 메시지 유지
         }
+
+        // 🚩 이 section 값이 주소창에 ?section=categories 처럼 붙어서 튕김을 방지합니다.
+        rttr.addAttribute("section", section);
         return "redirect:/admin/dashboard";
     }
 
@@ -169,27 +137,57 @@ public class AdminController {
         return "admin/modify";
     }
 
+//    @PostMapping("/modify")
+//    public String modifyPost(@RequestParam("type") String type, CategoryDTO categoryDTO, ForbiddenWordDTO wordDTO, RedirectAttributes rttr) {
+//        if ("category".equals(type)) {
+//            adminService.modifyCategory(categoryDTO);
+//            rttr.addAttribute("section", "categories");
+//        } else if ("word".equals(type)) {
+//            adminService.modifyWord(wordDTO);
+//            rttr.addAttribute("section", "banned");
+//        }
+//        return "redirect:/admin/dashboard";
+//    }
+
     @PostMapping("/modify")
     public String modifyPost(@RequestParam("type") String type, CategoryDTO categoryDTO, ForbiddenWordDTO wordDTO, RedirectAttributes rttr) {
+        String section = "";
         if ("category".equals(type)) {
             adminService.modifyCategory(categoryDTO);
-            rttr.addAttribute("section", "categories");
+            section = "categories"; // 카테고리 탭으로
         } else if ("word".equals(type)) {
             adminService.modifyWord(wordDTO);
-            rttr.addAttribute("section", "banned");
+            section = "banned";     // 금지어 탭으로
         }
+
+        rttr.addAttribute("section", section);
         return "redirect:/admin/dashboard";
     }
 
+//    @GetMapping("/delete")
+//    public String delete(@RequestParam("type") String type, @RequestParam("id") Integer id, RedirectAttributes rttr) {
+//        if ("word".equals(type)) {
+//            adminService.removeWord(id);
+//            rttr.addAttribute("section", "banned");
+//        } else if ("category".equals(type)) {
+//            adminService.removeCategory(id);
+//            rttr.addAttribute("section", "categories");
+//        }
+//        return "redirect:/admin/dashboard";
+//    }
+
     @GetMapping("/delete")
     public String delete(@RequestParam("type") String type, @RequestParam("id") Integer id, RedirectAttributes rttr) {
+        String section = "";
         if ("word".equals(type)) {
             adminService.removeWord(id);
-            rttr.addAttribute("section", "banned");
+            section = "banned";     // 삭제 후 금지어 탭 유지
         } else if ("category".equals(type)) {
             adminService.removeCategory(id);
-            rttr.addAttribute("section", "categories");
+            section = "categories"; // 삭제 후 카테고리 탭 유지
         }
+
+        rttr.addAttribute("section", section);
         return "redirect:/admin/dashboard";
     }
 

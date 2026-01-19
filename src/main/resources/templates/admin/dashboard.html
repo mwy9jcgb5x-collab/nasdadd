@@ -71,7 +71,7 @@
         <aside class="admin-sidebar">
             <h2 class="admin-title">관리자 페이지</h2>
             <nav class="admin-menu">
-                <button class="admin-menu-item active"
+                <button class="admin-menu-item"
                         onclick="showSection('users', event)">
                     계정 목록
                 </button>
@@ -110,7 +110,7 @@
 <!--                </div>-->
 <!--            </section>-->
 
-            <section id="users-section" class="content-section active">
+            <section id="users-section" class="content-section">
                 <h3 class="admin-title">계정 목록</h3>
 
                 <div th:each="user : ${userList}" class="user-item" style="border-bottom: 1px solid #eee; padding: 10px 0;">
@@ -240,58 +240,113 @@
     </div>
 </main>
 
-<script th:inline="javascript">
-    // 탭 전환 함수
-    function showSection(sectionId, event) {
-        // 모든 섹션 숨기기
-        document.querySelectorAll('.content-section')
-            .forEach(s => s.classList.remove('active'));
+<!--<script th:inline="javascript">-->
+<!--    // 탭 전환 함수-->
+<!--    function showSection(sectionId, event) {-->
+<!--        // 모든 섹션 숨기기-->
+<!--        document.querySelectorAll('.content-section')-->
+<!--            .forEach(s => s.classList.remove('active'));-->
 
-        // 선택한 섹션만 보이기
+<!--        // 선택한 섹션만 보이기-->
+<!--        const targetSection = document.getElementById(sectionId + '-section');-->
+<!--        if (targetSection) {-->
+<!--            targetSection.classList.add('active');-->
+<!--        }-->
+
+<!--        // 모든 버튼 비활성화-->
+<!--        document.querySelectorAll('.admin-menu-item')-->
+<!--            .forEach(item => item.classList.remove('active'));-->
+
+<!--        // 클릭된 버튼만 활성화-->
+<!--        if(event && event.currentTarget) {-->
+<!--            event.currentTarget.classList.add('active');-->
+<!--        }-->
+<!--    }-->
+
+<!--    // 페이지 로드 시 실행-->
+<!--    window.onload = function() {-->
+<!--        // 1. [추가] 중복 오류 메시지 알림 처리-->
+<!--        const errorMsg = [[${error}]];-->
+<!--        if (errorMsg) {-->
+<!--            alert(errorMsg); // "이미 존재하는 카테고리입니다" 등의 메시지 출력-->
+<!--        }-->
+
+<!--        // 2. [추가] 일반 처리 완료 메시지 (선택 사항)-->
+<!--        const result = [[${result}]];-->
+<!--        if (result === 'success') {-->
+<!--            alert("정상적으로 등록되었습니다.");-->
+<!--        }-->
+
+<!--        // 3. 기존 탭 유지 로직-->
+<!--        const urlParams = new URLSearchParams(window.location.search);-->
+<!--        const section = urlParams.get('section');-->
+
+<!--        if (section) {-->
+<!--            showSection(section);-->
+
+<!--            document.querySelectorAll('.admin-menu-item').forEach(btn => {-->
+<!--                const onclickAttr = btn.getAttribute('onclick');-->
+<!--                if (onclickAttr && onclickAttr.includes("'" + section + "'")) {-->
+<!--                    btn.classList.add('active');-->
+<!--                } else {-->
+<!--                    btn.classList.remove('active');-->
+<!--                }-->
+<!--            });-->
+<!--        }-->
+<!--    };-->
+<!--</script>-->
+
+<script th:inline="javascript">
+    function showSection(sectionId, event) {
+        // 1. 모든 섹션 숨기기
+        document.querySelectorAll('.content-section').forEach(s => {
+            s.classList.remove('active');
+            s.style.display = 'none'; // 확실하게 숨김
+        });
+
+        // 2. 선택한 섹션만 보이기
         const targetSection = document.getElementById(sectionId + '-section');
         if (targetSection) {
             targetSection.classList.add('active');
+            targetSection.style.display = 'block'; // 확실하게 표시
         }
 
-        // 모든 버튼 비활성화
-        document.querySelectorAll('.admin-menu-item')
-            .forEach(item => item.classList.remove('active'));
+        // 3. 버튼 활성화 상태 변경
+        document.querySelectorAll('.admin-menu-item').forEach(item => item.classList.remove('active'));
 
-        // 클릭된 버튼만 활성화
+        // 클릭 이벤트가 있으면 해당 버튼 활성화, 없으면 ID로 찾아서 활성화
         if(event && event.currentTarget) {
             event.currentTarget.classList.add('active');
+        } else {
+            const buttons = document.querySelectorAll('.admin-menu-item');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes("'" + sectionId + "'")) {
+                    btn.classList.add('active');
+                }
+            });
         }
     }
 
-    // 페이지 로드 시 실행
     window.onload = function() {
-        // 1. [추가] 중복 오류 메시지 알림 처리
+        // [순서 중요!] 1. 섹션을 먼저 화면에 그립니다.
+        const urlParams = new URLSearchParams(window.location.search);
+        const section = urlParams.get('section') || 'users';
+        showSection(section);
+
+        // [순서 중요!] 2. 섹션이 보이고 난 뒤에 알림창을 띄웁니다.
         const errorMsg = [[${error}]];
         if (errorMsg) {
-            alert(errorMsg); // "이미 존재하는 카테고리입니다" 등의 메시지 출력
+            // setTimeout을 써서 브라우저가 화면을 그릴 시간을 줍니다.
+            setTimeout(() => {
+                alert(errorMsg);
+            }, 100);
         }
 
-        // 2. [추가] 일반 처리 완료 메시지 (선택 사항)
         const result = [[${result}]];
         if (result === 'success') {
-            alert("정상적으로 등록되었습니다.");
-        }
-
-        // 3. 기존 탭 유지 로직
-        const urlParams = new URLSearchParams(window.location.search);
-        const section = urlParams.get('section');
-
-        if (section) {
-            showSection(section);
-
-            document.querySelectorAll('.admin-menu-item').forEach(btn => {
-                const onclickAttr = btn.getAttribute('onclick');
-                if (onclickAttr && onclickAttr.includes("'" + section + "'")) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
+            setTimeout(() => {
+                alert("정상적으로 처리되었습니다.");
+            }, 100);
         }
     };
 </script>

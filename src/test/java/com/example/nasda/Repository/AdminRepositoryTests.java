@@ -29,7 +29,15 @@ public class AdminRepositoryTests {
 
     @BeforeEach
     void setUp() {
-        // 모든 테스트의 기초: 유저와 카테고리 (데이터 고정)
+        // 1. 삭제 순서: 자식 테이블을 가장 먼저 삭제해야 합니다.
+        // 만약 금지어(ForbiddenWord)가 유저나 카테고리를 참조한다면 얘를 1번으로 지우세요.
+        forbiddenWordRepository.deleteAll();
+
+        // 2. 그 다음 부모 테이블 삭제
+        userRepository.deleteAll();
+        categoryRepository.deleteAll();
+
+        // 3. 데이터 다시 삽입
         commonCategory = CategoryEntity.builder()
                 .categoryName("고정 카테고리")
                 .isActive(true)
@@ -37,10 +45,10 @@ public class AdminRepositoryTests {
         categoryRepository.save(commonCategory);
 
         commonUser = UserEntity.builder()
-                .nickname("관리자1")
-                .email("admin_fixed1@test.com")
-                .password("12345")
-                .loginId("admin_fixed_id1")
+                .nickname("관리자12")
+                .email("admin_fixed2@test.com")
+                .password("123455")
+                .loginId("admin_fixed_id12")
                 .role(UserRole.ADMIN)
                 .status(UserStatus.ACTIVE)
                 .build();
@@ -61,12 +69,12 @@ public class AdminRepositoryTests {
     // 2. 금지어 관리 (반복문)
     @Test
     void testForbiddenWord() {
-//        IntStream.rangeClosed(1, 10).forEach(i -> {
+        IntStream.rangeClosed(1, 10).forEach(i -> {
             forbiddenWordRepository.save(ForbiddenWordEntity.builder()
-//                                                            .word("금지어_" + i)
-                                                            .word("금지어_111")
+                                                            .word("금지어_" + i)
+                                                            .word("금지어_221")
                                                             .build());
-//        });
+        });
     }
 
     // 3. 유저 관리
