@@ -5,9 +5,14 @@ import com.example.nasda.dto.*;
 import com.example.nasda.repository.CategoryRepository; // 🚩 임포트 확인
 import com.example.nasda.repository.ForbiddenWordRepository;
 import lombok.extern.log4j.Log4j2;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 
 @SpringBootTest
@@ -116,4 +121,27 @@ public class AdminServiceTests {
         categoryRepository.save(category);
         log.info("DB에 실제 데이터 저장 완료 (롤백 안 됨)");
     }
+
+    @Test
+    @DisplayName("신고 내역 페이징 데이터가 실제로 넘어오는지 확인")
+    public void testGetPostReportsPaging() {
+        // 1. 테스트 설정: 0페이지에서 10개, reportId 역순
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("reportId").descending());
+
+        // 2. 서비스 실행
+        Page<PostReportDTO> result = adminService.getPendingPostReports(pageable);
+
+        // 3. 로그 출력 (이게 찍혀야 성공!)
+        log.info("---------------------------------------");
+        log.info("총 신고 수: " + result.getTotalElements());
+        log.info("현재 페이지 데이터 수: " + result.getContent().size());
+        log.info("전체 페이지 수: " + result.getTotalPages());
+        log.info("---------------------------------------");
+
+        // 만약 데이터가 있다면 첫 번째 신고 사유 확인
+        if(!result.isEmpty()) {
+            log.info("첫 번째 신고 사유: " + result.getContent().get(0).getReason());
+        }
+    }
+    
 }

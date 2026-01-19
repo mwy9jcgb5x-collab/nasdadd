@@ -1,270 +1,299 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-
 <head>
     <th:block th:replace="~{layout/header :: head}"></th:block>
-
     <style>
         .admin-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 3rem 1.5rem;
         }
-
         .admin-layout {
             display: flex;
             gap: 2rem;
         }
-
         .admin-sidebar {
             width: 16rem;
             flex-shrink: 0;
         }
-
         .admin-title {
-            font-family: var(--font-serif);
             font-size: 1.75rem;
             font-weight: 600;
-            color: var(--text-dark);
+            color: #4a3f35;
             margin-bottom: 1.5rem;
         }
-
         .admin-menu {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            /* 사이드바 고정 */
-            position: sticky;
-            top: 2rem;
         }
-
         .admin-menu-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            display: block;
+            width: 100%;
             padding: 0.75rem 1rem;
+            text-align: left;
             background: #ffffff;
             border: 1px solid #eee1d5;
             border-radius: 0.75rem;
-            font-family: var(--font-sans);
-            font-weight: 500;
-            color: var(--text-dark);
             cursor: pointer;
-            transition: all 0.3s ease;
+            color: #4a3f35;
             text-decoration: none;
         }
-
-        .admin-menu-item:hover {
-            background: #fdfaf7; /* var(--bg-cream) 대신 직접 컬러값 사용 */
-        }
-
         .admin-menu-item.active {
-            background: #4a3f35; /* var(--text-dark) 대신 직접 컬러값 사용 */
+            background: #4a3f35;
             color: white;
         }
-
-        /* ✅ 핵심: 세로 스크롤 영역 설정 */
         .admin-content {
             flex: 1;
-            height: calc(100vh - 200px); /* 화면 높이에 맞춰 고정 */
-            overflow-y: auto;            /* 내용 많으면 내부 스크롤 */
-            padding-right: 1rem;
         }
-
-        /* 스크롤바 디자인 (직접 컬러 지정) */
-        .admin-content::-webkit-scrollbar {
-            width: 6px;
-        }
-        .admin-content::-webkit-scrollbar-thumb {
-            background: #d2b48c;
-            border-radius: 10px;
-        }
-
-        .admin-content::-webkit-scrollbar-track {
-            background: #f9f9f9;
-        }
-
         .content-section {
             display: none;
         }
-
         .content-section.active {
             display: block;
         }
-
-        /* 세로형 아이템 카드 스타일 */
-        .report-item, .suspended-item, .word-item, .cat-item {
+        .report-item, .word-item, .cat-item, .user-item {
             padding: 1.5rem;
             background: #fdfaf7;
+            border: 1px solid #eee1d5;
             border-radius: 0.75rem;
             margin-bottom: 1rem;
-            border: 1px solid transparent;
-            transition: 0.3s;
-        }
-        .report-item:hover, .word-item:hover { border-color: #d2b48c; background: white; }
-
-        .btn-add {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background: #4a3f35;
-            color: white;
-            border: none;
-            border-radius: 0.75rem;
-            font-size: 1rem;
-            cursor: pointer;
-            text-decoration: none;
-            margin-bottom: 1.5rem;
-        }
-
-        .action-buttons { display: flex; gap: 0.5rem; margin-top: 1rem; }
-
-        .icon { width: 1.25rem; height: 1.25rem; stroke: currentColor; fill: none; stroke-width: 2; }
-
-        @media (max-width: 1024px) {
-            .admin-layout { flex-direction: column; }
-            .admin-sidebar { width: 100%; }
         }
     </style>
 </head>
-
-<body class="min-h-screen bg-white">
-
+<body class="bg-white">
 <div th:replace="~{layout/header :: header}"></div>
 
 <main class="admin-container">
     <div class="admin-layout">
+
         <aside class="admin-sidebar">
             <h2 class="admin-title">관리자 페이지</h2>
             <nav class="admin-menu">
-                <button class="admin-menu-item active" onclick="showSection('reports', event)">
-                    <div class="admin-menu-item-content" style="display:flex; align-items:center; gap:0.75rem;">
-                        <svg class="icon" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>
-                        <span>신고 목록</span>
-                    </div>
+                <button class="admin-menu-item active"
+                        onclick="showSection('users', event)">
+                    계정 목록
                 </button>
-                <button class="admin-menu-item" onclick="showSection('suspended', event)">
-                    <div class="admin-menu-item-content" style="display:flex; align-items:center; gap:0.75rem;">
-                        <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path></svg>
-                        <span>정지 계정</span>
-                    </div>
+                <button class="admin-menu-item"
+                        onclick="showSection('reports', event)">
+                    신고 목록
                 </button>
-                <button class="admin-menu-item" onclick="showSection('banned', event)">
-                    <div class="admin-menu-item-content" style="display:flex; align-items:center; gap:0.75rem;">
-                        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle></svg>
-                        <span>금지어 목록</span>
-                    </div>
+                <button class="admin-menu-item"
+                        onclick="showSection('banned', event)">
+                    금지어 목록
                 </button>
-                <button class="admin-menu-item" onclick="showSection('categories', event)">
-                    <div class="admin-menu-item-content" style="display:flex; align-items:center; gap:0.75rem;">
-                        <svg class="icon" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line></svg>
-                        <span>카테고리 목록</span>
-                    </div>
+                <button class="admin-menu-item"
+                        onclick="showSection('categories', event)">
+                    카테고리 목록
                 </button>
             </nav>
         </aside>
 
         <div class="admin-content" id="scrollArea">
 
-            <section id="reports-section" class="content-section active">
-                <h3 class="section-title">신고 목록</h3>
-                <div th:each="report : ${reportList}" class="report-item">
-                    <div style="display: flex; justify-content: space-between;">
+<!--            <section id="users-section" class="content-section active">-->
+<!--                <h3 class="admin-title">계정 목록</h3>-->
+<!--                <div th:each="user : ${memberList}" class="user-item">-->
+<!--                    <div style="display: flex; justify-content: space-between;">-->
+<!--                        <div>-->
+<!--                            <strong th:text="${user.email}"></strong>-->
+<!--                            <p th:text="'이름: ' + ${user.name} + ' | 권한: ' + ${user.role}"-->
+<!--                               style="margin-top: 5px; color: #8a7e72;"></p>-->
+<!--                        </div>-->
+<!--                        <a th:href="@{/admin/user/delete(email=${user.email})}"-->
+<!--                           onclick="return confirm('삭제하시겠습니까?')"-->
+<!--                           style="color:#e74c3c; font-weight:bold;">-->
+<!--                            강퇴-->
+<!--                        </a>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </section>-->
+
+            <section id="users-section" class="content-section active">
+                <h3 class="admin-title">계정 목록</h3>
+
+                <div th:each="user : ${userList}" class="user-item" style="border-bottom: 1px solid #eee; padding: 10px 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <strong th:text="'신고 번호 #' + ${report.reportId}">번호</strong>
-                            <p style="font-size: 0.875rem; color: #8a7e72;" th:text="'신고자: ' + ${report.reporterName}">신고자</p>
+                            <strong th:text="${user.nickname}" style="font-size: 1.1em;">닉네임</strong>
+
+                            <p style="margin-top: 5px; color: #8a7e72; font-size: 0.9em;">
+                                상태: <span th:text="${user.status}"
+                                          th:style="${user.status == 'SUSPENDED' ? 'color:#e74c3c; font-weight:bold;' : ''}"></span>
+
+                                <span th:if="${user.suspension_end_date != null}"
+                                      th:text="' | 종료일: ' + ${user.suspension_end_date}"></span>
+                            </p>
                         </div>
-                        <span style="padding: 0.25rem 0.75rem; background:#fee; color:#c33; border-radius:999px; font-size:0.875rem;" th:text="${report.status}">대기중</span>
-                    </div>
-                    <p style="margin-top:0.75rem;" th:text="${report.reason}">사유 내용</p>
-                    <div class="action-buttons">
-                        <button style="padding:0.5rem 1rem; background:#4a3f35; color:white; border:none; border-radius:0.5rem; cursor:pointer;">확인</button>
-                        <button style="padding:0.5rem 1rem; background:white; border:1px solid #eee1d5; border-radius:0.5rem; cursor:pointer;">무시</button>
+
+
                     </div>
                 </div>
             </section>
 
-            <section id="suspended-section" class="content-section">
-                <h3 class="section-title">정지 계정 목록</h3>
-                <div th:each="user : ${userList}" class="suspended-item">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <strong th:text="${user.username}">ID</strong>
-                            <p style="font-size: 0.875rem; color: #8a7e72;" th:text="'사유: ' + ${user.suspensionReason}">사유</p>
+            <section id="reports-section" class="content-section">
+                <h3 class="admin-title">신고 목록</h3>
+
+                <div style="display: flex; gap: 10px; margin-bottom: 25px;">
+                    <a th:href="@{/admin/dashboard(section='reports', type='post')}"
+                       th:style="${type == 'post' ? 'padding:0.6rem 1.2rem; background:#4a3f35; color:white; border-radius:0.5rem; text-decoration:none;' : 'padding:0.6rem 1.2rem; background:#f5f5f5; color:#4a3f35; border-radius:0.5rem; text-decoration:none; border:1px solid #ddd;'}">
+                        📄 게시글 신고
+                    </a>
+                    <a th:href="@{/admin/dashboard(section='reports', type='comment')}"
+                       th:style="${type == 'comment' ? 'padding:0.6rem 1.2rem; background:#4a3f35; color:white; border-radius:0.5rem; text-decoration:none;' : 'padding:0.6rem 1.2rem; background:#f5f5f5; color:#4a3f35; border-radius:0.5rem; text-decoration:none; border:1px solid #ddd;'}">
+                        💬 댓글 신고
+                    </a>
+                </div>
+
+                <div th:if="${type == 'post'}">
+                    <h4 style="margin-bottom: 15px; color: #4a3f35;">📄 게시글 신고 내역</h4>
+                    <div th:each="report : ${postReportList}" class="report-item">
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong th:text="'게시글 신고 #' + ${report.reportId}"></strong>
+                            <span th:text="${report.status}" style="color: #c33; font-weight: bold;"></span>
                         </div>
-                        <button style="padding:0.5rem 1rem; background:#a68966; color:white; border:none; border-radius:0.5rem; cursor:pointer;">정지 해제</button>
+                        <p th:text="'사유: ' + ${report.reason}" style="margin-top:0.75rem; color: #8a7e72;"></p>
+                        <form th:action="@{/admin/report/process}" method="post" style="margin-top: 1rem;">
+                            <input type="hidden" name="reportId" th:value="${report.reportId}">
+                            <input type="hidden" name="type" value="post">
+                            <button name="action" value="APPROVE" style="padding:0.4rem 0.8rem; background:#4a3f35; color:white; border-radius:0.4rem; border:none; cursor:pointer;">승인(삭제)</button>
+                        </form>
+                    </div>
+
+                    <div th:if="${postTotalPages > 0}" style="display: flex; justify-content: center; gap: 8px; margin-top: 25px;">
+                        <a th:href="@{/admin/dashboard(postPage=${postCurrentPage - 1}, section='reports', type='post')}" th:if="${postCurrentPage > 0}" style="text-decoration: none; color: #4a3f35;">&lt; 이전</a>
+                        <span th:each="i : ${#numbers.sequence(0, postTotalPages - 1)}">
+                <a th:href="@{/admin/dashboard(postPage=${i}, section='reports', type='post')}" th:text="${i + 1}"
+                   th:style="${i == postCurrentPage ? 'font-weight:bold; color:#c33; text-decoration: underline;' : 'text-decoration: none; color: #4a3f35;'}"></a>
+            </span>
+                        <a th:href="@{/admin/dashboard(postPage=${postCurrentPage + 1}, section='reports', type='post')}" th:if="${postCurrentPage < postTotalPages - 1}" style="text-decoration: none; color: #4a3f35;">다음 &gt;</a>
+                    </div>
+                </div>
+
+                <div th:if="${type == 'comment'}">
+                    <h4 style="margin-bottom: 15px; color: #4a3f35;">💬 댓글 신고 내역</h4>
+                    <div th:each="cReport : ${commentReportList}" class="report-item">
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong th:text="'댓글 신고 #' + ${cReport.reportId}"></strong>
+                            <span th:text="${cReport.status}" style="color: #c33; font-weight: bold;"></span>
+                        </div>
+                        <p th:text="'사유: ' + ${cReport.reason}" style="margin-top:0.75rem; color: #8a7e72;"></p>
+                        <form th:action="@{/admin/report/process}" method="post" style="margin-top: 1rem;">
+                            <input type="hidden" name="reportId" th:value="${cReport.reportId}">
+                            <input type="hidden" name="type" value="comment">
+                            <button name="action" value="APPROVE" style="padding:0.4rem 0.8rem; background:#4a3f35; color:white; border-radius:0.4rem; border:none; cursor:pointer;">승인(삭제)</button>
+                        </form>
+                    </div>
+
+                    <div th:if="${commentTotalPages > 0}" style="display: flex; justify-content: center; gap: 8px; margin-top: 25px;">
+                        <a th:href="@{/admin/dashboard(commentPage=${commentCurrentPage - 1}, section='reports', type='comment')}" th:if="${commentCurrentPage > 0}" style="text-decoration: none; color: #4a3f35;">&lt; 이전</a>
+                        <span th:each="i : ${#numbers.sequence(0, commentTotalPages - 1)}">
+                <a th:href="@{/admin/dashboard(commentPage=${i}, section='reports', type='comment')}" th:text="${i + 1}"
+                   th:style="${i == commentCurrentPage ? 'font-weight:bold; color:#c33; text-decoration: underline;' : 'text-decoration: none; color: #4a3f35;'}"></a>
+            </span>
+                        <a th:href="@{/admin/dashboard(commentPage=${commentCurrentPage + 1}, section='reports', type='comment')}" th:if="${commentCurrentPage < commentTotalPages - 1}" style="text-decoration: none; color: #4a3f35;">다음 &gt;</a>
                     </div>
                 </div>
             </section>
             <section id="banned-section" class="content-section">
-                <h3 class="section-title">금지어 목록</h3>
-                <a th:href="@{/admin/register(type='word')}" class="btn-add">+ 금지어 추가</a>
-
-                <div th:each="word : ${wordList}" class="word-item" style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 class="admin-title">금지어 목록</h3>
+                <a th:href="@{/admin/register(type='word')}"
+                   style="display:inline-block; margin-bottom:1.5rem; color:#4a3f35; font-weight:bold;">
+                    + 금지어 추가
+                </a>
+                <div th:each="word : ${wordList}"
+                     class="word-item"
+                     style="display:flex; justify-content:space-between;">
+                    <span th:text="${word.word}"></span>
                     <div>
-                        <span th:text="${word.forbiddenwordId}" style="color: #ccc; margin-right: 10px;">ID</span>
-                        <span th:text="${word.word}">금지어</span>
-                    </div>
-                    <div style="display:flex; gap:0.5rem;">
-                        <a th:href="@{/admin/modify(type='word', id=${word.forbiddenwordId})}" style="text-decoration:none; color:#4a3f35; font-size:0.875rem;">수정</a>
-
-                        <button th:onclick="|if(confirm('삭제하시겠습니까?')) location.href='@{/admin/delete(type='word', id=${word.forbiddenwordId})}'|"
-                                style="color:#e74c3c; background:none; border:none; cursor:pointer; font-size:0.875rem;">삭제</button>
+                        <a th:href="@{/admin/modify(type='word', id=${word.forbiddenwordId})}"
+                           style="margin-right:10px; color:#4a3f35;">수정</a>
+                        <a th:href="@{/admin/delete(type='word', id=${word.forbiddenwordId})}"
+                           onclick="return confirm('삭제')"
+                           style="color:#e74c3c;">삭제</a>
                     </div>
                 </div>
             </section>
 
             <section id="categories-section" class="content-section">
-                <h3 class="section-title">카테고리 목록</h3>
-                <a th:href="@{/admin/register(type='category')}" class="btn-add">+ 카테고리 추가</a>
-
-                <div th:each="cat : ${categoryList}" class="cat-item" style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 class="admin-title">카테고리 목록</h3>
+                <a th:href="@{/admin/register(type='category')}"
+                   style="display:inline-block; margin-bottom:1.5rem; color:#4a3f35; font-weight:bold;">
+                    + 카테고리 추가
+                </a>
+                <div th:each="cat : ${categoryList}"
+                     class="cat-item"
+                     style="display:flex; justify-content:space-between;">
+                    <span th:text="${cat.categoryName}"></span>
                     <div>
-                        <span th:text="${cat.categoryId}" style="color: #ccc; margin-right: 10px;">ID</span>
-                        <span th:text="${cat.categoryName}">카테고리</span>
-                    </div>
-                    <div style="display:flex; gap:0.5rem;">
-                        <a th:href="@{/admin/modify(type='category', id=${cat.categoryId})}" style="text-decoration:none; color:#4a3f35; font-size:0.875rem;">수정</a>
-                        <button th:onclick="|if(confirm('삭제하시겠습니까?')) location.href='@{/admin/delete(type='category', id=${cat.categoryId})}'|"
-                                style="color:#e74c3c; background:none; border:none; cursor:pointer; font-size:0.875rem;">삭제</button>
+                        <a th:href="@{/admin/modify(type='category', id=${cat.categoryId})}"
+                           style="margin-right:10px; color:#4a3f35;">수정</a>
+                        <a th:href="@{/admin/delete(type='category', id=${cat.categoryId})}"
+                           onclick="return confirm('삭제')"
+                           style="color:#e74c3c;">삭제</a>
                     </div>
                 </div>
             </section>
+
         </div>
-    </div> </main>
+    </div>
+</main>
 
 <script th:inline="javascript">
+    // 탭 전환 함수
     function showSection(sectionId, event) {
         // 모든 섹션 숨기기
-        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.content-section')
+            .forEach(s => s.classList.remove('active'));
+
         // 선택한 섹션만 보이기
-        const target = document.getElementById(sectionId + '-section');
-        if(target) target.classList.add('active');
-
-        // 사이드바 모든 버튼 active 해제
-        document.querySelectorAll('.admin-menu-item').forEach(item => item.classList.remove('active'));
-
-        if(event) {
-            // 클릭한 버튼 active
-            event.currentTarget.classList.add('active');
-        } else {
-            // 파라미터로 왔을 때 해당 버튼 찾아서 active (사이드바 메뉴 유지용)
-            const menuBtn = document.querySelector(`button[onclick*='${sectionId}']`);
-            if(menuBtn) menuBtn.classList.add('active');
+        const targetSection = document.getElementById(sectionId + '-section');
+        if (targetSection) {
+            targetSection.classList.add('active');
         }
-        document.getElementById('scrollArea').scrollTop = 0;
+
+        // 모든 버튼 비활성화
+        document.querySelectorAll('.admin-menu-item')
+            .forEach(item => item.classList.remove('active'));
+
+        // 클릭된 버튼만 활성화
+        if(event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
+        }
     }
 
-    // ✅ 핵심 수정: 등록/삭제 후 리다이렉트 시 보던 탭 강제 활성화
+    // 페이지 로드 시 실행
     window.onload = function() {
+        // 1. [추가] 중복 오류 메시지 알림 처리
+        const errorMsg = [[${error}]];
+        if (errorMsg) {
+            alert(errorMsg); // "이미 존재하는 카테고리입니다" 등의 메시지 출력
+        }
+
+        // 2. [추가] 일반 처리 완료 메시지 (선택 사항)
+        const result = [[${result}]];
+        if (result === 'success') {
+            alert("정상적으로 등록되었습니다.");
+        }
+
+        // 3. 기존 탭 유지 로직
         const urlParams = new URLSearchParams(window.location.search);
         const section = urlParams.get('section');
 
         if (section) {
-            // URL에 section 파라미터가 있으면 해당 섹션 함수 실행
             showSection(section);
+
+            document.querySelectorAll('.admin-menu-item').forEach(btn => {
+                const onclickAttr = btn.getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes("'" + section + "'")) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
         }
-    }
+    };
 </script>
 </body>
 </html>
