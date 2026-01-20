@@ -92,23 +92,23 @@
 
         <div class="admin-content" id="scrollArea">
 
-<!--            <section id="users-section" class="content-section active">-->
-<!--                <h3 class="admin-title">계정 목록</h3>-->
-<!--                <div th:each="user : ${memberList}" class="user-item">-->
-<!--                    <div style="display: flex; justify-content: space-between;">-->
-<!--                        <div>-->
-<!--                            <strong th:text="${user.email}"></strong>-->
-<!--                            <p th:text="'이름: ' + ${user.name} + ' | 권한: ' + ${user.role}"-->
-<!--                               style="margin-top: 5px; color: #8a7e72;"></p>-->
-<!--                        </div>-->
-<!--                        <a th:href="@{/admin/user/delete(email=${user.email})}"-->
-<!--                           onclick="return confirm('삭제하시겠습니까?')"-->
-<!--                           style="color:#e74c3c; font-weight:bold;">-->
-<!--                            강퇴-->
-<!--                        </a>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </section>-->
+            <!--            <section id="users-section" class="content-section active">-->
+            <!--                <h3 class="admin-title">계정 목록</h3>-->
+            <!--                <div th:each="user : ${memberList}" class="user-item">-->
+            <!--                    <div style="display: flex; justify-content: space-between;">-->
+            <!--                        <div>-->
+            <!--                            <strong th:text="${user.email}"></strong>-->
+            <!--                            <p th:text="'이름: ' + ${user.name} + ' | 권한: ' + ${user.role}"-->
+            <!--                               style="margin-top: 5px; color: #8a7e72;"></p>-->
+            <!--                        </div>-->
+            <!--                        <a th:href="@{/admin/user/delete(email=${user.email})}"-->
+            <!--                           onclick="return confirm('삭제하시겠습니까?')"-->
+            <!--                           style="color:#e74c3c; font-weight:bold;">-->
+            <!--                            강퇴-->
+            <!--                        </a>-->
+            <!--                    </div>-->
+            <!--                </div>-->
+            <!--            </section>-->
 
             <section id="users-section" class="content-section">
                 <h3 class="admin-title">계정 목록</h3>
@@ -196,12 +196,53 @@
                     </div>
                 </div>
             </section>
+<!--            <section id="banned-section" class="content-section">-->
+<!--                <h3 class="admin-title">금지어 목록</h3>-->
+<!--                <a th:href="@{/admin/register(type='word')}"-->
+<!--                   style="display:inline-block; margin-bottom:1.5rem; color:#4a3f35; font-weight:bold;">-->
+<!--                    + 금지어 추가-->
+<!--                </a>-->
+<!--                <div th:each="word : ${wordList}"-->
+<!--                     class="word-item"-->
+<!--                     style="display:flex; justify-content:space-between;">-->
+<!--                    <span th:text="${word.word}"></span>-->
+<!--                    <div>-->
+<!--                        <a th:href="@{/admin/modify(type='word', id=${word.forbiddenwordId})}"-->
+<!--                           style="margin-right:10px; color:#4a3f35;">수정</a>-->
+<!--                        <a th:href="@{/admin/delete(type='word', id=${word.forbiddenwordId})}"-->
+<!--                           onclick="return confirm('삭제')"-->
+<!--                           style="color:#e74c3c;">삭제</a>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </section>-->
+
+<!--            <section id="categories-section" class="content-section">-->
+<!--                <h3 class="admin-title">카테고리 목록</h3>-->
+<!--                <a th:href="@{/admin/register(type='category')}"-->
+<!--                   style="display:inline-block; margin-bottom:1.5rem; color:#4a3f35; font-weight:bold;">-->
+<!--                    + 카테고리 추가-->
+<!--                </a>-->
+<!--                <div th:each="cat : ${categoryList}"-->
+<!--                     class="cat-item"-->
+<!--                     style="display:flex; justify-content:space-between;">-->
+<!--                    <span th:text="${cat.categoryName}"></span>-->
+<!--                    <div>-->
+<!--                        <a th:href="@{/admin/modify(type='category', id=${cat.categoryId})}"-->
+<!--                           style="margin-right:10px; color:#4a3f35;">수정</a>-->
+<!--                        <a th:href="@{/admin/delete(type='category', id=${cat.categoryId})}"-->
+<!--                           onclick="return confirm('삭제')"-->
+<!--                           style="color:#e74c3c;">삭제</a>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </section>-->
+
             <section id="banned-section" class="content-section">
                 <h3 class="admin-title">금지어 목록</h3>
                 <a th:href="@{/admin/register(type='word')}"
                    style="display:inline-block; margin-bottom:1.5rem; color:#4a3f35; font-weight:bold;">
                     + 금지어 추가
                 </a>
+
                 <div th:each="word : ${wordList}"
                      class="word-item"
                      style="display:flex; justify-content:space-between;">
@@ -214,6 +255,19 @@
                            style="color:#e74c3c;">삭제</a>
                     </div>
                 </div>
+
+                <div th:if="${wordTotalPages > 0}" style="display: flex; justify-content: center; gap: 8px; margin-top: 25px;">
+                    <a th:href="@{/admin/dashboard(wordPage=${wordCurrentPage - 1}, section='banned')}"
+                       th:if="${wordCurrentPage > 0}" style="text-decoration: none; color: #4a3f35;">&lt; 이전</a>
+
+                    <span th:each="i : ${#numbers.sequence(0, wordTotalPages - 1)}">
+            <a th:href="@{/admin/dashboard(wordPage=${i}, section='banned')}" th:text="${i + 1}"
+               th:style="${i == wordCurrentPage ? 'font-weight:bold; color:#c33; text-decoration: underline;' : 'text-decoration: none; color: #4a3f35;'}"></a>
+        </span>
+
+                    <a th:href="@{/admin/dashboard(wordPage=${wordCurrentPage + 1}, section='banned')}"
+                       th:if="${wordCurrentPage < wordTotalPages - 1}" style="text-decoration: none; color: #4a3f35;">다음 &gt;</a>
+                </div>
             </section>
 
             <section id="categories-section" class="content-section">
@@ -222,6 +276,7 @@
                    style="display:inline-block; margin-bottom:1.5rem; color:#4a3f35; font-weight:bold;">
                     + 카테고리 추가
                 </a>
+
                 <div th:each="cat : ${categoryList}"
                      class="cat-item"
                      style="display:flex; justify-content:space-between;">
@@ -233,6 +288,19 @@
                            onclick="return confirm('삭제')"
                            style="color:#e74c3c;">삭제</a>
                     </div>
+                </div>
+
+                <div th:if="${catTotalPages > 0}" style="display: flex; justify-content: center; gap: 8px; margin-top: 25px;">
+                    <a th:href="@{/admin/dashboard(catPage=${catCurrentPage - 1}, section='categories')}"
+                       th:if="${catCurrentPage > 0}" style="text-decoration: none; color: #4a3f35;">&lt; 이전</a>
+
+                    <span th:each="i : ${#numbers.sequence(0, catTotalPages - 1)}">
+            <a th:href="@{/admin/dashboard(catPage=${i}, section='categories')}" th:text="${i + 1}"
+               th:style="${i == catCurrentPage ? 'font-weight:bold; color:#c33; text-decoration: underline;' : 'text-decoration: none; color: #4a3f35;'}"></a>
+        </span>
+
+                    <a th:href="@{/admin/dashboard(catPage=${catCurrentPage + 1}, section='categories')}"
+                       th:if="${catCurrentPage < catTotalPages - 1}" style="text-decoration: none; color: #4a3f35;">다음 &gt;</a>
                 </div>
             </section>
 
